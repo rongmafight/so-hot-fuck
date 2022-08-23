@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:mysql://124.222.93.56:3306/react_study
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  security:
+    user:
+      name: user
+      password: 111111
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**Mapper.xml
