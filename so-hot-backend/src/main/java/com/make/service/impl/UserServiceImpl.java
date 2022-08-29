@@ -28,6 +28,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.make.common.lang.Const.CAPTCHA_KEY;
+
 /**
  * <p>
  *  服务实现类
@@ -67,8 +69,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Override
     public Result logout() {
-        LoginUser loginUser = (LoginUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Integer id = loginUser.getUser().getId();
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Integer id = user.getId();
         // 从redis中删除用户
         JedisWrapper.useJedis(jedis -> {
             return jedis.del("login:" + id);
@@ -89,6 +91,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         String base64Img = str + encoder.encode(outputStream.toByteArray());
 
         // 存入redis
+        JedisWrapper.useJedis(jedis -> {
+            return jedis.setex(CAPTCHA_KEY + ":" + key, 120, code);
+        });
         log.info("验证码 -- {} - {}", key, code);
         return Result.success(
                 MapUtil.builder()

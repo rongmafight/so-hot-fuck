@@ -1,5 +1,8 @@
 package com.make.config;
 
+import com.make.common.exception.AccessDeniedHandlerImpl;
+import com.make.common.exception.AuthenticationEntryPointImpl;
+import com.make.filter.CaptchaFilter;
 import com.make.filter.JwtAuthenticationTokenFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,6 +41,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Resource
     private JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
+    @Resource
+    private CaptchaFilter captchaFilter;
+    @Resource
+    private AuthenticationEntryPointImpl authenticationEntryPoint;
+    @Resource
+    private AccessDeniedHandlerImpl accessDeniedHandler;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -48,9 +57,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 // 对于登录接口，允许匿名访问
-                .antMatchers("/user/login").anonymous()
+                .antMatchers("/user/login", "/user/captcha").anonymous()
                 .anyRequest().authenticated();
+        // 添加过滤器
         http.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(captchaFilter, JwtAuthenticationTokenFilter.class);
+        // 添加异常处理器
+        http.exceptionHandling()
+                .authenticationEntryPoint(authenticationEntryPoint) // 认证失败
+                .accessDeniedHandler(accessDeniedHandler); //授权失败
+        // 开启跨域
+        http.cors();
     }
 
 }

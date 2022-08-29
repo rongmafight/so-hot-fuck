@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.make.entity.LoginUser;
 import com.make.entity.User;
+import com.make.mapper.MenuMapper;
 import com.make.mapper.UserMapper;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,6 +30,8 @@ public class UserDetailServiceImpl implements UserDetailsService {
 
     @Resource
     private UserMapper userMapper;
+    @Resource
+    private MenuMapper menuMapper;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -42,7 +45,7 @@ public class UserDetailServiceImpl implements UserDetailsService {
             throw new RuntimeException("用户不存在");
         }
         // 存储用户权限信息
-        List<String> permissions = new ArrayList<>(Collections.singletonList("teacher"));
+        List<String> permissions = menuMapper.selectPermsByUserId(user.getId());
         return new LoginUser(user, permissions);
     }
 }

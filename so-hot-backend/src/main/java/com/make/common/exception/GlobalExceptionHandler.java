@@ -19,7 +19,7 @@ import java.nio.file.AccessDeniedException;
  */
 
 @Slf4j
-@RestControllerAdvice
+//@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
